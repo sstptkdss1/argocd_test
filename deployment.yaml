@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+  namespace: argocd2
+  labels:
+    app.kubernetes.io/name: argocd-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: argocd-server
+    spec:
+      containers:
+        - name: argocd-server
+          image: argoproj/argocd:latest  # 원하는 버전으로 변경 가능
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ARGOCD_SERVER_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: argocd-secret
+                  key: password
+          volumeMounts:
+            - name: argocd-data
+              mountPath: /data
+      volumes:
+        - name: argocd-data
+          persistentVolumeClaim:
+            claimName: argocd-pvc
+
